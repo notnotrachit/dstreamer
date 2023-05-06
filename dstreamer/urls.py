@@ -17,9 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from streamer import views as streamer_views
-
+from django.urls import re_path
+from dstreamer import consumer
+from streamer import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', streamer_views.index, name='index'),
+    # re_path(r'^ws/stream/$', consumer.StreamConsumer.as_asgi()),
+    # Streaming URL
+    path('stream/<str:stream_id>/', views.stream, name='stream'),
+    path('ws/stream/<str:stream_id>/', consumer.StreamConsumer.as_asgi()),
+    
+    # Viewing URL
+    path('ws/watch/<str:stream_id>/', views.watch, name='watch'),
 ]

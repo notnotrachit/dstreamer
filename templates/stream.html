@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+    <video id="stream" autoplay></video>
+    <script>
+        const stream = new WebSocket('ws://' + window.location.host + '/ws/stream/{{ stream_id }}/');
+
+        stream.onopen = function() {
+            console.log('WebSocket connection established.');
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function(mediaStream) {
+                const video = document.getElementById('stream');
+                video.srcObject = mediaStream;
+        
+                setInterval(function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const image = canvas.toDataURL('image/jpeg', 0.5); // Reducing image quality
+                    stream.send(JSON.stringify({ image: image }));
+                }, 50);
+            });
+        };
+    </script>
+{% endblock content %}

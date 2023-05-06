@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+    <img id="return"></img>
+    <script>
+        const stream = new WebSocket('ws://' + window.location.host + '/ws/stream/{{ stream_id }}/');
+        stream.onopen = function() {
+            console.log('WebSocket connection established.');
+        };
+
+        stream.onmessage = function(event) {
+            console.log('WebSocket message received.');
+            // console.log(event.data);
+            // console.log(event.data);
+            data_json = JSON.parse(event.data);
+            // console.log(data_json['image']);
+            const return_vid = document.getElementById('return');
+            return_vid.src = data_json['image'];
+        };
+    </script>
+{% endblock content %}

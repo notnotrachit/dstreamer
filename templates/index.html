@@ -1,6 +1,78 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<span class="text-4xl">Hello World</span>
-
+    <div class="flex justify-center">
+        <button id="start" class="btn my-5">Start stream</button>
+    </div>
+    <div class="flex justify-center">
+        <video id="stream" autoplay class="hidden m-5 bg-primary rounded-xl p-5"></video>
+    </div>
+    <div class="hidden" id="return_div">
+        <div class="flex justify-center my-5">
+            <h1 class="text-2xl">Stream Preview:</h1>
+        </div>
+        <div class="flex justify-center">
+            <img id="return" class="rounded-xl bg-primary/50 p-3"></img>
+        </div>
+    </div>
+    <div class="flex justify-center my-5">
+        <button id="stop" class="btn hidden">Stop stream</button>
+    </div>
+    <script>
+        const start = document.getElementById('start');
+        const stop = document.getElementById('stop');
+        const return_img = document.getElementById('return_div');
+        let intervalId;
+        let streamin;
+        let stream_return;
+        let localStream;
+    
+        start.onclick = function() {
+            start.classList.add('hidden');
+            stop.classList.remove('hidden');
+            const video_element = document.getElementById('stream');
+            return_img.classList.remove('hidden');
+            video_element.classList.remove('hidden');
+    
+            streamin = new WebSocket('ws://' + window.location.host + '/ws/stream/base/');
+            streamin.onopen = function() {
+                console.log('WebSocket connection established.');
+                navigator.mediaDevices.getUserMedia({ video: true }).then(function(mediaStream) {
+                    localStream = mediaStream;
+                    const video = document.getElementById('stream');
+                    video.srcObject = mediaStream;
+                    intervalId = setInterval(function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth/4;
+                        canvas.height = video.videoHeight/4;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        const image = canvas.toDataURL();
+                        streamin.send(JSON.stringify({ image: image }));
+                    }, 250);
+                });
+            };
+            
+            stream_return = new WebSocket('ws://' + window.location.host + '/ws/watch/base/');
+            streamin.onmessage = function(event) {
+                console.log('WebSocket message received.');
+                data_json = JSON.parse(event.data);
+                const return_vid = document.getElementById('return');
+                return_vid.src = data_json['image'];
+            };
+        };
+        stop.onclick = function() {
+            start.classList.remove('hidden');
+            stop.classList.add('hidden');
+            const video_element = document.getElementById('stream');
+            video_element.classList.add('hidden');
+            return_img.classList.add('hidden');
+            clearInterval(intervalId);
+            streamin.close();
+            stream_return.close();
+            localStream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+        };
+    </script>
+    
 {% endblock content %}
