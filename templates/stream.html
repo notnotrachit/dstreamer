@@ -1,6 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
-    <video id="stream" autoplay></video>
+    <div class="flex justify-center m-5">
+        <video id="stream" autoplay class="p-5 rounded-xl bg-primary"></video>
+    </div>
+    <div class="flex justify-center m-5">
+        <div class="w-96">
+            <label for="watch_url" class="block font-medium mb-2">Public Watch URL:</label>
+            <div class="relative rounded-md shadow-sm">
+                <input id="watch_url" type="text" readonly class="input input-bordered w-full">
+                <div class="flex justify-evenly m-3">
+                    <button id="copy_button" type="button" class="btn btn-primary text-white">
+                        Copy
+                    </button>
+
+                    <button id="share_button" type="button" class="btn btn-primary text-white">
+                        Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         const stream = new WebSocket('ws://' + window.location.host + '/ws/stream/{{ stream_id }}/');
 
@@ -20,6 +39,32 @@
                     stream.send(JSON.stringify({ image: image }));
                 }, 50);
             });
+
+            const watch_url = document.getElementById('watch_url').value = window.location.protocol + '//' + window.location.host + '/ws/watch/{{ stream_id }}/';
+            const copy_button = document.getElementById('copy_button');
+            const share_button = document.getElementById('share_button');
+
+            // Copy watch URL to clipboard
+            copy_button.addEventListener('click', function() {
+                const watch_url_input = document.getElementById('watch_url');
+                watch_url_input.select();
+                document.execCommand('copy');
+            });
+
+            // Share watch URL using Web Share API
+            if (navigator.share) {
+                share_button.addEventListener('click', function() {
+                    navigator.share({
+                        title: 'Live Stream',
+                        text: 'Check out my live stream!',
+                        url: watch_url
+                    })
+                    .then(() => console.log('Share successful!'))
+                    .catch(error => console.log('Error sharing:', error));
+                });
+            } else {
+                share_button.style.display = 'none';
+            }
         };
     </script>
 {% endblock content %}

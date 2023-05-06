@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="flex justify-center m-5">
+        <form onsubmit="submitForm(event)">
+            <label for="room-name" class="block text-lg font-medium mb-2">Room Name/Code:</label>
+            <input type="text" id="room-name" name="room-name" pattern="[A-Za-z0-9_]+" required class="input input-bordered w-full max-w-xs" placeholder="Enter room name/code">
+            <div class="flex justify-center m-5"><button type="submit" class="btn btn-primary text-white">Start Stream</button></div>
+        </form>
+    </div>
+    <script>
+        function submitForm(event) {
+            event.preventDefault();
+            const roomName = document.getElementById('room-name').value;
+            const roomCode = roomName.trim().replace(/\s+/g, '_');
+            window.location.href = `/stream/${roomCode}`;
+        }
+    </script>
+{% endblock content %}

@@ -31,4 +31,6 @@ urlpatterns = [
     
     # Viewing URL
     path('ws/watch/<str:stream_id>/', views.watch, name='watch'),
+    path('new_room/', views.new_room, name='new_room'),
+    path('join_room/', views.join_room, name='join_room'),
 ]

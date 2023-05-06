@@ -15,3 +15,9 @@ def watch(request, stream_id):
         'stream_id': stream_id,
     }
     return render(request, 'watch.html', context)
+
+def new_room(request):
+    return render(request, 'new_room.html')
+
+def join_room(request):
+    return render(request, 'join_room.html')
