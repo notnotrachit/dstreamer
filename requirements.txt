@@ -1,4 +1,4 @@
 django
 django-channels
 daphne
-channels["daphne"]
+channels
