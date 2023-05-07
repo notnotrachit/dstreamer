@@ -1,4 +1,5 @@
 django
 django-channels
 daphne
+channels
 channels[daphne]
