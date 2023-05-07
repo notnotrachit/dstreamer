@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-    <img id="return"></img>
+    <div class="flex justify-center m-5">
+        <img id="return" class="border-primary border-8 rounded-xl"></img>
+    </div>
     <script>
         const stream = new WebSocket('ws://' + window.location.host + '/ws/stream/{{ stream_id }}/');
         stream.onopen = function() {
