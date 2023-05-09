@@ -1,38 +1,10 @@
-# import asyncio
-# import json
-# from channels.consumer import AsyncConsumer
-
-# class StreamConsumer(AsyncConsumer):
-
-#     async def websocket_connect(self, event):
-#         # print('connected', event)
-#         print('connected')
-#         await self.send({
-#             'type': 'websocket.accept'
-#         })
-
-#     async def websocket_receive(self, event):
-#         # print('received', event)
-#         print('received')
-#         message = json.loads(event['text'])
-#         await self.send({
-#             'type': 'websocket.send',
-#             'text': message['image']
-#         })
-
-#     async def websocket_send(self, event):
-#         # print('sent', event)
-#         print('sent')
-
-#     async def websocket_disconnect(self, event):
-#         # print('disconnected', event)
-#         print('disconnected')
 import asyncio
 import json
 import base64
 from asgiref.sync import async_to_sync
-
+from PIL import Image
 from channels.generic.websocket import AsyncWebsocketConsumer
+from io import BytesIO
 
 class StreamConsumer(AsyncWebsocketConsumer):
 
@@ -63,8 +35,13 @@ class StreamConsumer(AsyncWebsocketConsumer):
         )
 
     async def send_stream(self, event):
+        image_data = base64.b64decode(event['image'].split(',')[1])
+        image = Image.open(BytesIO(image_data)).convert('L')
+        buffer = BytesIO()
+        image.save(buffer, format='JPEG')
+        image_str = base64.b64encode(buffer.getvalue()).decode()
         await self.send(text_data=json.dumps({
-            'image': event['image']
+            'image': f"data:image/jpeg;base64,{image_str}"
         }))
 
 class WatchConsumer(AsyncWebsocketConsumer):
